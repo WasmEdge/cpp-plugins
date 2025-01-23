@@ -1,0 +1,65 @@
+---
+name: Build on Linux
+
+on:
+  workflow_call:
+    inputs:
+      plugins:
+        type: string
+        required: true
+      version:
+        type: string
+        default: wip # TODO
+
+permissions: {}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.plugins) }}
+    name: ${{ matrix.plugin }}
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: wasmedge/wasmedge:${{ matrix.docker_tag }}
+    env:
+      bin: lib${{ matrix.target }}.so
+      target: ${{ matrix.test }} # TODO: use matrix.target on release
+      test_dir: build/test/plugins/${{ matrix.dir }}
+      output_dir: build/plugins/${{ matrix.dir }}
+    steps:
+      - id: var
+        run: |
+          echo "artifact=WasmEdge-plugin-${{ matrix.plugin }}-${{ inputs.version }}-${{ matrix.asset_tag }}.tar.gz" >> "${GITHUB_OUTPUT}"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          repository: 'WasmEdge/WasmEdge' # TODO: checkout plugins from this repository
+      - name: Ensure git safe directory
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+      - name: Build ${{ matrix.plugin }}
+        run: |
+          # TODO: Disable BUILD_TESTS on release
+          # TODO: Enable CXX11_ABI if not manylinux_2_28
+          cmake -Bbuild -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWASMEDGE_BUILD_TESTS=ON  \
+            -DWASMEDGE_BUILD_TOOLS=OFF \
+            -DWASMEDGE_USE_LLVM=OFF \
+            -DWASMEDGE_USE_CXX11_ABI=OFF \
+            "-DOPENSSL_ROOT_DIR=${OpenSSL_DIR}" \
+            ${{ matrix.options }}
+          cmake --build build --target "${target}"
+
+          cp -f "${output_dir}/${bin}" "${bin}"
+          tar -zcvf "${{ steps.var.outputs.artifact }}" "${bin}"
+      - name: Test ${{ matrix.plugin }}
+        run: |
+          cd "${test_dir}" && "./${target}"
+      - name: Upload ${{ steps.var.outputs.artifact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.var.outputs.artifact }}
+          path: ${{ steps.var.outputs.artifact }}
