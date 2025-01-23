@@ -1,0 +1,49 @@
+{
+  "plugins": [
+    {
+      "plugin": "wasi_crypto",
+      "dir": "wasi_crypto",
+      "target": "wasmedgePluginWasiCrypto",
+      "test": "wasiCryptoTests",
+      "options": "-DWASMEDGE_PLUGIN_WASI_CRYPTO=ON",
+      "platforms": {
+        "manylinux_2_28_x86_64": {},
+        "ubuntu_2004_x86_64": {}
+      }
+    },
+    {
+      "plugin": "wasi_nn-openvino",
+      "dir": "wasi_nn",
+      "target": "wasmedgePluginWasiNN",
+      "test": "wasiNNTests",
+      "options": "-DWASMEDGE_PLUGIN_WASI_NN_BACKEND=OpenVINO",
+      "platforms": {
+        "ubuntu_2004_x86_64": {}
+      }
+    },
+    {
+      "plugin": "wasmedge_stablediffusion",
+      "dir": "wasmedge_stablediffusion",
+      "target": "wasmedgePluginWasmEdgeStableDiffusion",
+      "test": "wasmedgeStableDiffusionTests",
+      "options": "-DWASMEDGE_PLUGIN_STABLEDIFFUSION=ON",
+      "platforms": {
+        "macos_arm64": {
+            "options": "-DWASMEDGE_PLUGIN_STABLEDIFFUSION_METAL=ON"
+        },
+        "manylinux_2_28_x86_64": {}
+      }
+    }
+  ],
+  "platforms": {
+    "macos_arm64": {
+      "runner": "macos-14",
+      "asset_tag": "darwin_23-arm64"
+    },
+    "manylinux_2_28_x86_64": {
+      "runner": "ubuntu-latest",
+      "docker_tag": "manylinux_2_28_x86_64-plugins-deps",
+      "asset_tag": "manylinux_2_28_x86_64"
+    }
+  }
+}
