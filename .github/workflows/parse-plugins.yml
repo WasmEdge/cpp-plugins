@@ -1,0 +1,52 @@
+---
+name: Parse
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/plugins.json'
+      - '.github/scripts/parse-plugins.js'
+      - '.github/workflows/parse-plugins.yml'
+
+  workflow_call:
+    inputs:
+      workflow_call: # workaround to distinguish ${{ github.event }}
+        type: boolean
+        default: true
+    outputs:
+      plugins:
+        value: ${{ jobs.parse.outputs.plugins }}
+
+jobs:
+  parse:
+    name: Parse configuration file
+    runs-on: ubuntu-latest
+    outputs:
+      plugins: ${{ steps.readfile.outputs.plugins }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: readfile
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const { parse } = require(".github/scripts/parse-plugins.js");
+            const fs = require("fs");
+            const s = fs.readFileSync(".github/plugins.json");
+            const config = parse(JSON.parse(s));
+            core.setOutput("plugins", config);
+
+  test:
+    if: ${{ !inputs.workflow_call }}
+    needs: parse
+    name: Self-testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the first target from ubuntu2004_cuda11
+        run: |
+          echo "target=${{ fromJSON(needs.parse.outputs.plugins).ubuntu2004_cuda11[0].target }}" >> "${GITHUB_ENV}"
+      - name: Check target
+        run: |
+          echo "${target}"
+          test "${target}" = 'wasmedgePluginWasmEdgeStableDiffusion'
