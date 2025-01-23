@@ -1,0 +1,36 @@
+---
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  get-versions:
+    uses: ./.github/workflows/get-versions.yml
+
+  parse-plugins:
+    uses: ./.github/workflows/parse-plugins.yml
+
+  linux:
+    needs:
+      - get-versions
+      - parse-plugins
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: manylinux_2_28 (x86_64)
+            plugins: ${{ fromJSON(needs.parse-plugins.outputs.plugins).manylinux_2_28_x86_64 }}
+          - name: ubuntu20.04 (x86_64)
+            plugins: ${{ fromJSON(needs.parse-plugins.outputs.plugins).ubuntu2004_x86_64 }}
+          - name: ubuntu20.04 (x86_64) with CUDA 11.3
+            plugins: ${{ fromJSON(needs.parse-plugins.outputs.plugins).ubuntu2004_cuda11 }}
+    name: ${{ matrix.name }}
+    uses: ./.github/workflows/build-on-linux.yml
+    with:
+      plugins: ${{ toJSON(matrix.plugins) }}
+      version: ${{ needs.get-versions.outputs.version }}
+    secrets: inherit
