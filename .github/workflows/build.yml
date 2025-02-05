@@ -1,0 +1,26 @@
+---
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  parse:
+    uses: ./.github/workflows/parse-plugins.yml
+
+  linux:
+    needs: parse
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: manylinux_2_28 (x86_64)
+            plugins: ${{ fromJSON(needs.parse.outputs.plugins).manylinux_2_28_x86_64 }}
+    name: ${{ matrix.name }}
+    uses: ./.github/workflows/build-on-linux.yml
+    with:
+      plugins: ${{ toJSON(matrix.plugins) }}
+    secrets: inherit
