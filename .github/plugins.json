@@ -1,0 +1,55 @@
+{
+  "plugins": {
+    "wasi_crypto": {
+      "dir": "wasi_crypto",
+      "target": "wasmedgePluginWasiCrypto",
+      "test": "wasiCryptoTests",
+      "options": "-DWASMEDGE_PLUGIN_WASI_CRYPTO=ON",
+      "platforms": [
+        {"key":"manylinux_2_28_x86_64"},
+        {"key":"ubuntu2004_x86_64"}
+      ]
+    },
+    "wasi_nn-openvino": {
+      "dir": "wasi_nn",
+      "target": "wasmedgePluginWasiNN",
+      "test": "wasiNNTests",
+      "options": "-DWASMEDGE_PLUGIN_WASI_NN_BACKEND=OpenVINO",
+      "platforms": [
+        {"key":"ubuntu2004_x86_64"}
+      ]
+    },
+    "wasmedge_stablediffusion": {
+      "dir": "wasmedge_stablediffusion",
+      "target": "wasmedgePluginWasmEdgeStableDiffusion",
+      "test": "wasmedgeStableDiffusionTests",
+      "options": "-DWASMEDGE_PLUGIN_STABLEDIFFUSION=ON",
+      "platforms": [
+        {"key":"manylinux_2_28_x86_64"},
+        {"key":"ubuntu2004_x86_64"},
+        {
+          "key":"ubuntu2004_cuda11",
+          "options": "-DWASMEDGE_PLUGIN_STABLEDIFFUSION_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES='60;61;70' -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+          "plugin_tag": "cuda-11"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "manylinux_2_28_x86_64": {
+      "runner": "ubuntu-latest",
+      "docker_tag": "manylinux_2_28_x86_64-plugins-deps",
+      "asset_tag": "manylinux_2_28_x86_64"
+    },
+    "ubuntu2004_x86_64": {
+      "runner": "ubuntu-latest",
+      "docker_tag": "ubuntu-20.04-build-clang-plugins-deps",
+      "asset_tag": "ubuntu20.04_x86_64"
+    },
+    "ubuntu2004_cuda11": {
+      "runner": "ubuntu-latest",
+      "docker_tag": "ubuntu-20.04-build-gcc-cuda11",
+      "asset_tag": "ubuntu20.04_x86_64"
+    }
+  }
+}

@@ -1,0 +1,82 @@
+---
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  get-versions:
+    uses: ./.github/workflows/get-versions.yml
+
+  parse-plugins:
+    uses: ./.github/workflows/parse-plugins.yml
+
+  linux:
+    needs:
+      - get-versions
+      - parse-plugins
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: manylinux_2_28 (x86_64)
+            plugins: ${{ fromJSON(needs.parse-plugins.outputs.plugins).manylinux_2_28_x86_64 }}
+          - name: ubuntu20.04 (x86_64)
+            plugins: ${{ fromJSON(needs.parse-plugins.outputs.plugins).ubuntu2004_x86_64 }}
+          - name: ubuntu20.04 (x86_64) with CUDA 11.3
+            plugins: ${{ fromJSON(needs.parse-plugins.outputs.plugins).ubuntu2004_cuda11 }}
+    name: ${{ matrix.name }}
+    uses: ./.github/workflows/build-on-linux.yml
+    with:
+      plugins: ${{ toJSON(matrix.plugins) }}
+      version: ${{ needs.get-versions.outputs.version }}
+    secrets: inherit
+
+  check-artifacts:
+    needs:
+      - get-versions
+      - parse-plugins
+      - linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const raw = JSON.parse(fs.readFileSync(".github/plugins.json"));
+
+            core.summary.addHeading('Build Summary');
+
+            let table = [
+              [{data: 'plugin/platform', header: true}],
+            ];
+            let platforms = [];
+            Object.entries(raw.platforms).forEach(([key, platform]) => {
+              table[0].push({data: key, header: true});
+              platforms.push(platform.asset_tag);
+            });
+
+            let artifacts = await github
+              .paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId,
+              });
+
+            Object.keys(raw.plugins).forEach((plugin) => {
+              let row = [{data: plugin, header: true}];
+              let filtered = artifacts.filter((artifact) => artifact.name.includes(plugin));
+              platforms.forEach((tag) => {
+                row.push({
+                  data: filtered.some((artifact) => artifact.name.includes(tag)) ? ':ok:' : ':x:'
+                });
+              });
+              table.push(row);
+            });
+
+            core.summary.addTable(table);
+            core.summary.write()
