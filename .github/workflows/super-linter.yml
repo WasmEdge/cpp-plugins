@@ -21,17 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Work around super-linter
-        shell: bash
-        run: |
-          # Work-around for config file detection
-          cp .github/linters/.commitlintrc.yml .commitlintrc.yml
-          # Work-around for SHA detection
-          # https://github.com/super-linter/super-linter/issues/6316#issuecomment-2510205626
-          if [[ '${{ github.event_name }}' == 'pull_request' ]]; then
-            echo 'GITHUB_BEFORE_SHA=${{ github.event.pull_request.base.sha }}' >> "${GITHUB_ENV}"
-          fi
-
       - name: Run super-linter
         uses: super-linter/super-linter/slim@v7.4.0
         env:
