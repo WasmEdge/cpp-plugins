@@ -1,0 +1,65 @@
+---
+name: WASI-NN GGML
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-wasi_nn-ggml.yml'
+      - 'plugins/wasi_nn/**'
+      - 'test/plugins/wasi_nn/**'
+
+permissions: {}
+
+jobs:
+  build:
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu20.04
+            arch: x86_64
+            runner: ubuntu-latest
+            image: wasmedge/wasmedge:ubuntu-20.04-build-gcc-plugins-deps
+            script: ubuntu2004.sh
+
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.image }}
+
+    name: ${{ matrix.platform }} (${{ matrix.arch }})
+
+    env:
+      OUTPUT_DIR: build
+      OUTPUT_BIN: libwasmedgePluginWasiNN.so
+      WASMEDGE_GGML_BUILD: b5640
+      WASMEDGE_VERSION: 0.14.1_plugin_lts
+
+    steps:
+      - name: Checkout WasmEdge
+        uses: actions/checkout@v4
+        with:
+          repository: WasmEdge/WasmEdge
+          ref: ${{ env.WASMEDGE_VERSION }}
+          fetch-depth: 0
+
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+        with:
+          path: this
+
+      - id: build
+        name: Build
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          rm -rf "${OUTPUT_DIR}"
+          bash -e "this/.github/scripts/wasi_nn-ggml/${{ matrix.script }}"
+        shell: bash
+
+      - name: Upload ${{ steps.build.outputs.artifact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.artifact }}
+          path: ${{ steps.build.outputs.artifact }}
