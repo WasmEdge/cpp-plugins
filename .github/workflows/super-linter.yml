@@ -14,6 +14,8 @@ jobs:
 
     permissions:
       contents: read
+      packages: read
+      pull-requests: write
 
     steps:
       - name: Checkout with history
@@ -24,6 +26,7 @@ jobs:
       - name: Run super-linter
         uses: super-linter/super-linter/slim@v8.6.0
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # super-linter configurations
           MULTI_STATUS: false
           SUPPRESS_POSSUM: true
