@@ -1,0 +1,49 @@
+#==============================================================================#
+# This file specifies intentionally untracked files that git should ignore.
+# See: http://www.kernel.org/pub/software/scm/git/docs/gitignore.html
+#
+# Trimmed from WasmEdge/WasmEdge .gitignore.
+#==============================================================================#
+
+#==============================================================================#
+# File extensions to be ignored anywhere in the tree.
+#==============================================================================#
+# Temp files created by most text editors.
+*~
+# Merge files created by git.
+*.orig
+# vim swap files
+.*.sw?
+.sw?
+# OS X specific files.
+.DS_Store
+
+# Nested build directory
+/build
+
+#==============================================================================#
+# Explicit files to ignore (only matches one).
+#==============================================================================#
+/compile_commands.json
+# Visual Studio built-in CMake configuration
+/CMakeSettings.json
+# CLion project configuration
+/.idea
+
+#==============================================================================#
+# Directories to ignore (do not add trailing '/'s, they skip symlinks).
+#==============================================================================#
+# VS2017 and VSCode config files.
+.vscode
+.vs
+# clangd index
+.clangd
+.cache
+
+# CLion cmake caches
+**/cmake-build-debug
+**/cmake-build-debug-remote-host
+**/cmake-build-release
+
+# Superpowers-generated plans/specs (scratch design docs, not committed)
+docs/superpowers/
