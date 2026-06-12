@@ -28,6 +28,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # super-linter configurations
+          # imported third-party/generated code and BPF test fixtures are not
+          # format-enforced upstream (see .github/scripts/clang-format.sh there)
+          FILTER_REGEX_EXCLUDE: .*/(thirdparty|test/plugins/wasm_bpf/assets)/.*
           MULTI_STATUS: false
           SUPPRESS_POSSUM: true
           VALIDATE_ALL_CODEBASE: false
