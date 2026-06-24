@@ -32,7 +32,8 @@ jobs:
           SUPPRESS_POSSUM: true
           VALIDATE_ALL_CODEBASE: false
           # language configurations
-          VALIDATE_CLANG_FORMAT: true
+          # clang-format is handled by .github/workflows/clang-format.yml, which
+          # mirrors upstream WasmEdge's pinned-version clang-format method.
           VALIDATE_MARKDOWN: true
           VALIDATE_YAML: true
           # misc configurations
