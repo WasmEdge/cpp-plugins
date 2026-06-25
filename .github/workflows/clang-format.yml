@@ -1,0 +1,27 @@
+---
+name: clang-format
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  clang-format:
+    name: Clang-Format
+    runs-on: ubuntu-24.04  # https://github.com/actions/runner-images/issues/10636
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install clang-format-22
+        run: |
+          curl -sSfL https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
+          sudo add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -sc)/ llvm-toolchain-$(lsb_release -sc)-22 main"
+          sudo apt update
+          sudo apt install -y clang-format-22
+      - name: Run clang-format
+        run: bash ./.github/scripts/clang-format.sh "$(which clang-format-22)"
