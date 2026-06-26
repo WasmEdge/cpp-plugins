@@ -52,11 +52,6 @@ if(WASMEDGE_PLUGIN_IMAGE)
   endif()
 endif()
 
-# WasmEdge plug-in: LLMC.
-if(WASMEDGE_PLUGIN_LLMC)
-  add_subdirectory(wasmedge_llmc)
-endif()
-
 # WasmEdge plug-in: OCR.
 if(WASMEDGE_PLUGIN_OCR)
   add_subdirectory(wasmedge_ocr)
