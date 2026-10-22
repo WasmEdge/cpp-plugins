@@ -23,6 +23,12 @@ target_compile_options(wasmedgePluginTestModuleC
   -DWASMEDGE_PLUGIN
 )
 
+target_include_directories(wasmedgePluginTestModuleC
+  PUBLIC
+  $<TARGET_PROPERTY:wasmedgePlugin,INCLUDE_DIRECTORIES>
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 # The test plugin module in C++ API
 wasmedge_add_library(wasmedgePluginTestModuleCPP
   SHARED

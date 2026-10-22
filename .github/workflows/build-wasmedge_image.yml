@@ -1,0 +1,38 @@
+---
+name: build-wasmedge_image
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-wasmedge_image.yml'
+      - '.github/scripts/wasmedge_image/**'
+      - 'plugins/wasmedge_image/**'
+      - 'test/plugins/wasmedge_image/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install WasmEdge
+        run: |
+          curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v 0.17.2
+
+      - name: Build and Test wasmedge_image
+        run: |
+          bash .github/scripts/wasmedge_image/build.sh

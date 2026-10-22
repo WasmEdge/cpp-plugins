@@ -6,8 +6,8 @@ if(WASMEDGE_PLUGIN_WASI_CRYPTO)
   add_subdirectory(wasi_crypto)
 endif()
 
-# WASI plug-in: WASI-Logging proposal.
-add_subdirectory(wasi_logging)
+# WASI plug-in: WASI-Logging proposal (disabled: target not imported in cpp-plugins per Issue #24).
+# add_subdirectory(wasi_logging)
 
 # WASI plug-in: WASI-NN proposal with backends.
 if(WASMEDGE_PLUGIN_WASI_NN_BACKEND)
@@ -100,4 +100,6 @@ if(WASMEDGE_PLUGIN_ZLIB)
 endif()
 
 # Plug-in unit tests.
-add_subdirectory(unittest)
+if(WASMEDGE_PLUGIN_UNITTESTS)
+  add_subdirectory(unittest)
+endif()
